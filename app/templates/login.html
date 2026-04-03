@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In - {{ app_name }}{% endblock %}
+{% block body_class %}auth-shell{% endblock %}
+
+{% block content %}
+<section class="auth-layout">
+  <div class="hero-card floating-card">
+    <p class="eyebrow">Private identity, public mystery</p>
+    <h1>Slip into the room without giving away who you are.</h1>
+    <p class="lede">
+      Emails stay hidden from everyone except the owner, usernames can be whatever you want,
+      and every group gives you a fresh anonymous alias.
+    </p>
+    <div class="hero-points">
+      <span>Live group chat</span>
+      <span>Alias-only rooms</span>
+      <span>Rename anytime</span>
+    </div>
+  </div>
+
+  <section class="panel auth-panel">
+    <div>
+      <p class="eyebrow">Welcome back</p>
+      <h2>Sign in</h2>
+      <p class="muted">Use the email you signed up with. Nobody else sees it.</p>
+    </div>
+    <form class="stack-form" method="post" action="/login">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>
+        <span>Email</span>
+        <input type="email" name="email" required autocomplete="email" value="{{ form_data.email if form_data else '' }}">
+      </label>
+      <label>
+        <span>Password</span>
+        <input type="password" name="password" required autocomplete="current-password">
+      </label>
+      <button class="primary-button" type="submit">Enter the app</button>
+    </form>
+    <p class="muted compact-copy">Need an account? <a href="/signup">Create one here</a>.</p>
+  </section>
+</section>
+{% endblock %}
+
+

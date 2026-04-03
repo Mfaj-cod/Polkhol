@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account - {{ app_name }}{% endblock %}
+{% block body_class %}auth-shell{% endblock %}
+
+{% block content %}
+<section class="auth-layout">
+  <div class="hero-card floating-card alt-glow">
+    <p class="eyebrow">Start anonymous conversations</p>
+    <h1>Create an account and choose any username you want.</h1>
+    <p class="lede">
+      Your username is just a display layer. You can change it or randomize it anytime,
+      while each group still hides you behind its own anonymous alias.
+    </p>
+    <div class="hero-points">
+      <span>Non-unique usernames</span>
+      <span>Private email identity</span>
+      <span>Creator-managed groups</span>
+    </div>
+  </div>
+
+  <section class="panel auth-panel">
+    <div>
+      <p class="eyebrow">Join {{ app_name }}</p>
+      <h2>Create account</h2>
+      <p class="muted">Pick an email and password. Your email stays private from other users.</p>
+    </div>
+    <form class="stack-form" method="post" action="/signup">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>
+        <span>Email</span>
+        <input type="email" name="email" required autocomplete="email" value="{{ form_data.email if form_data else '' }}">
+      </label>
+      <label>
+        <span>Username</span>
+        <input type="text" name="username" required minlength="2" maxlength="48" value="{{ form_data.username if form_data else '' }}">
+      </label>
+      <label>
+        <span>Password</span>
+        <input type="password" name="password" required minlength="8" autocomplete="new-password">
+      </label>
+      <button class="primary-button" type="submit">Create account</button>
+    </form>
+    <p class="muted compact-copy">Already inside? <a href="/login">Sign in instead</a>.</p>
+  </section>
+</section>
+{% endblock %}
+
+

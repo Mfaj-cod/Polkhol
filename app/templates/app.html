@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - {{ app_name }}{% endblock %}
+
+{% block content %}
+{% set featured_group = groups[0] if groups else None %}
+<section class="wa-shell dashboard-shell">
+  <aside class="wa-sidebar dashboard-sidebar">
+    <div class="wa-sidebar-header">
+      <div class="wa-pane-title">
+        <p class="eyebrow">Anonymous rooms</p>
+        <h1>Chats</h1>
+      </div>
+      <div class="wa-profile-chip">
+        <span class="wa-profile-dot"></span>
+        <div>
+          <strong>{{ current_user.username }}</strong>
+          <small>{{ current_user.account_code }}</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="wa-sidebar-intro">
+      <p class="muted">Your private lookup code is <strong>{{ current_user.account_code }}</strong>. Share it only when someone needs to add you.</p>
+    </div>
+
+    <div class="wa-sidebar-meta">
+      <span class="wa-count-pill">{{ groups|length }} rooms</span>
+      <a class="subtle-link" href="/settings">Manage profile</a>
+    </div>
+
+    <div class="wa-chat-list">
+      {% if groups %}
+        {% for group in groups %}
+          <a class="wa-chat-item" href="/groups/{{ group.id }}">
+            <div class="wa-chat-avatar">{{ group.title[:1]|upper }}</div>
+            <div class="wa-chat-copy">
+              <div class="wa-chat-line">
+                <strong>{{ group.title }}</strong>
+                <span>{{ group.last_message_at or "New room" }}</span>
+              </div>
+              {% if group.last_message_body %}
+                <p><strong>{{ group.last_message_alias }}</strong> - {{ group.last_message_body|truncate(36) }}</p>
+              {% else %}
+                <p>Your alias: {{ group.your_alias }}</p>
+              {% endif %}
+            </div>
+            <span class="wa-chat-badge">{{ group.member_count }}</span>
+          </a>
+        {% endfor %}
+      {% else %}
+        <div class="wa-empty-list">
+          <h3>No rooms yet</h3>
+          <p>Create your first anonymous room and it will appear here like a proper inbox.</p>
+        </div>
+      {% endif %}
+    </div>
+  </aside>
+
+  <section class="wa-main dashboard-main">
+    <header class="surface-hero dashboard-hero">
+      <div class="surface-hero-copy">
+        <p class="eyebrow">Current identity</p>
+        <h2>{{ current_user.username }}</h2>
+        <p class="muted">Your public-facing search name lives here. The moment you enter a room, the app swaps this for a stable anonymous alias.</p>
+      </div>
+      <div class="wa-stat-stack">
+        <div class="wa-stat-chip">
+          <span>Rooms</span>
+          <strong>{{ groups|length }}</strong>
+        </div>
+        <div class="wa-stat-chip">
+          <span>Code</span>
+          <strong>{{ current_user.account_code }}</strong>
+        </div>
+      </div>
+    </header>
+
+    <div class="dashboard-content-grid">
+      <section class="surface-card wa-stage-card">
+        {% if featured_group %}
+          <div class="card-header">
+            <div>
+              <p class="eyebrow">Latest room</p>
+              <h3>{{ featured_group.title }}</h3>
+            </div>
+            <span class="wa-count-pill">{{ featured_group.member_count }} members</span>
+          </div>
+          <p class="muted">Pick a room from the left rail and keep the conversation flowing in a clean messenger workspace.</p>
+          <div class="wa-preview-bubbles">
+            <div class="wa-preview-message">
+              <strong>{{ featured_group.last_message_alias or featured_group.your_alias }}</strong>
+              <span>{{ featured_group.last_message_body or "This room is waiting for its first anonymous message." }}</span>
+            </div>
+            <div class="wa-preview-message wa-preview-message-self">
+              <strong>Your alias</strong>
+              <span>{{ featured_group.your_alias }}</span>
+            </div>
+          </div>
+          <a class="primary-button button-link" href="/groups/{{ featured_group.id }}">Open selected room</a>
+        {% else %}
+          <div class="wa-empty-stage">
+            <p class="eyebrow">No active chats</p>
+            <h3>Start a new anonymous conversation</h3>
+            <p class="muted">Once you create a room, your inbox will populate on the left and the right pane becomes your conversation workspace.</p>
+          </div>
+        {% endif %}
+      </section>
+
+      <section class="surface-card wa-compose-card">
+        <div class="card-header card-header-stack">
+          <div>
+            <p class="eyebrow">New room</p>
+            <h3>Create a group</h3>
+          </div>
+          <p class="muted">Add people by username or account code, then jump directly into the alias-only room.</p>
+        </div>
+        <form method="post" action="/groups" class="stack-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <label>
+            <span>Group title</span>
+            <input type="text" name="title" required maxlength="80" placeholder="Night Owls, Side Quest, Secret Plans...">
+          </label>
+          <div class="picker-shell" data-user-picker data-search-url="/users/search">
+            <div class="picker-label-row">
+              <span>Add initial members</span>
+              <small>Search by username or account code</small>
+            </div>
+            <input type="search" class="search-input" placeholder="Start typing a username or code">
+            <div class="search-results"></div>
+            <div class="selected-users"></div>
+          </div>
+          <button class="primary-button" type="submit">Create anonymous group</button>
+        </form>
+      </section>
+    </div>
+  </section>
+</section>
+{% endblock %}

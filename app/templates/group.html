@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}{{ room.group.title }} - {{ app_name }}{% endblock %}
+{% block body_class %}room-page{% endblock %}
+{% block head %}
+<script defer src="{{ url_for('static', path='js/chat.js') }}?v={{ asset_version }}"></script>
+{% endblock %}
+
+{% block content %}
+{% set can_manage_room = current_user.is_admin or room.group.creator_id == current_user.id %}
+<section class="wa-shell room-shell" data-chat-room data-group-id="{{ room.group.id }}" data-max-length="2000">
+  <aside class="wa-sidebar room-sidebar">
+    <div class="wa-sidebar-header">
+      <div class="wa-pane-title">
+        <p class="eyebrow">Anonymous rooms</p>
+        <h2>Inbox</h2>
+      </div>
+      <a class="ghost-button room-back-link" href="/app">All rooms</a>
+    </div>
+
+    <div class="room-you-chip">
+      <span class="wa-profile-dot"></span>
+      <div>
+        <strong>{{ room.membership.alias }}</strong>
+        <small>Your alias in this room</small>
+      </div>
+    </div>
+
+    <div class="wa-sidebar-meta">
+      <span class="wa-count-pill">{{ room.aliases|length }} members</span>
+      <span class="muted tiny">Alias-only roster</span>
+    </div>
+
+    <div class="wa-chat-list room-chat-list">
+      {% for group in groups %}
+        <a class="wa-chat-item{% if group.id == room.group.id %} active{% endif %}" href="/groups/{{ group.id }}">
+          <div class="wa-chat-avatar">{{ group.title[:1]|upper }}</div>
+          <div class="wa-chat-copy">
+            <div class="wa-chat-line">
+              <strong>{{ group.title }}</strong>
+              <span>{{ group.last_message_at or "Now" }}</span>
+            </div>
+            {% if group.last_message_body %}
+              <p><strong>{{ group.last_message_alias }}</strong> - {{ group.last_message_body|truncate(30) }}</p>
+            {% else %}
+              <p>Your alias: {{ group.your_alias }}</p>
+            {% endif %}
+          </div>
+          <span class="wa-chat-badge">{{ group.member_count }}</span>
+        </a>
+      {% endfor %}
+    </div>
+
+    {% if can_manage_room %}
+      <section class="surface-card room-sidebar-section">
+        <div class="card-header card-header-stack">
+          <div>
+            <p class="eyebrow">Manage room</p>
+            <h3>Add people</h3>
+          </div>
+          <p class="muted">Search users by username or account code. Emails never appear here.</p>
+        </div>
+        <form method="post" action="/groups/{{ room.group.id }}/members" class="stack-form compact-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <div class="picker-shell" data-user-picker data-search-url="/users/search" data-group-id="{{ room.group.id }}">
+            <div class="picker-label-row">
+              <span>Search users</span>
+              <small>Usernames may repeat, so code helps</small>
+            </div>
+            <input type="search" class="search-input" placeholder="Find by username or code">
+            <div class="search-results"></div>
+            <div class="selected-users"></div>
+          </div>
+          <button class="ghost-button" type="submit">Update group members</button>
+        </form>
+      </section>
+    {% endif %}
+
+    <section class="surface-card room-members-card">
+      <div class="card-header card-header-stack">
+        <div>
+          <p class="eyebrow">Roster</p>
+          <h3>Anonymous aliases</h3>
+        </div>
+        <p class="muted">Sorted by alias to avoid leaking join order.</p>
+      </div>
+      <ul class="roster-list" data-roster-list>
+        {% for alias in room.aliases %}
+          <li class="roster-item{% if alias == room.membership.alias %} roster-self{% endif %}">{{ alias }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+  </aside>
+
+  <section class="wa-main room-main">
+    <header class="room-chat-header">
+      <div class="wa-chat-header-id">
+        <div class="wa-chat-avatar wa-chat-avatar-large">{{ room.group.title[:1]|upper }}</div>
+        <div>
+          <a class="back-link mobile-back-link" href="/app">Back to dashboard</a>
+          <h1>{{ room.group.title }}</h1>
+          <p class="muted">Anonymous room - your identity here is <strong>{{ room.membership.alias }}</strong>.</p>
+        </div>
+      </div>
+      <div class="room-status-block">
+        <span class="pill">{{ room.aliases|length }} members</span>
+        <span class="socket-indicator" data-socket-state aria-live="polite">Connecting...</span>
+      </div>
+    </header>
+
+    <div class="wa-chat-canvas">
+      <div class="messages whatsapp-stream" data-message-list>
+        {% if room.messages %}
+          {% for message in room.messages %}
+            <article class="message-card{% if message.alias == room.membership.alias %} message-self{% endif %}">
+              <div class="message-meta">
+                <strong>{{ message.alias }}</strong>
+                <span>{{ message.created_at }}</span>
+              </div>
+              <p>{{ message.body }}</p>
+            </article>
+          {% endfor %}
+        {% else %}
+          <div class="empty-chat" data-empty-chat>
+            <h3>Room is quiet</h3>
+            <p>Start the conversation. Everyone only sees aliases.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="flash flash-error hidden room-error" data-chat-error aria-live="polite"></div>
+
+    <form class="composer whatsapp-composer" data-chat-form>
+      <label class="sr-only" for="chat-body">Message</label>
+      <textarea id="chat-body" name="body" rows="1" maxlength="2000" placeholder="Write a message that keeps the mystery alive..." required></textarea>
+      <div class="composer-row">
+        <p class="muted tiny">Messages are stored with your room alias only.</p>
+        <div class="composer-actions">
+          <span class="muted tiny" data-char-count>0 / 2000</span>
+          <button class="primary-button" type="submit"><span data-submit-label>Send anonymously</span></button>
+        </div>
+      </div>
+    </form>
+  </section>
+</section>
+{% endblock %}

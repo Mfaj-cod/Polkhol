@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ app_name }}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/app.css') }}?v={{ asset_version }}">
+    <script defer src="{{ url_for('static', path='js/app.js') }}?v={{ asset_version }}"></script>
+    {% block head %}{% endblock %}
+  </head>
+  <body class="app-shell {% block body_class %}{% endblock %}">
+    <div class="aurora aurora-left"></div>
+    <div class="aurora aurora-right"></div>
+    <div class="grid-glow"></div>
+    <div class="page-wrap">
+      <header class="topbar">
+        <a class="brand" href="{{ '/app' if current_user else '/login' }}">
+          <span class="brand-mark">PK</span>
+          <span class="brand-copy">
+            <strong>{{ app_name }}</strong>
+            <small>Anonymous by design</small>
+          </span>
+        </a>
+        {% if current_user %}
+          <nav class="topnav" aria-label="Primary navigation">
+            <div class="topnav-links">
+              <a class="nav-link{% if request.url.path == '/app' %} active{% endif %}" href="/app"{% if request.url.path == '/app' %} aria-current="page"{% endif %}>Dashboard</a>
+              <a class="nav-link{% if request.url.path == '/settings' %} active{% endif %}" href="/settings"{% if request.url.path == '/settings' %} aria-current="page"{% endif %}>Settings</a>
+              {% if current_user.is_admin %}
+                <a class="nav-link{% if request.url.path.startswith('/admin') %} active{% endif %}" href="/admin/accounts"{% if request.url.path.startswith('/admin') %} aria-current="page"{% endif %}>Admin</a>
+              {% endif %}
+            </div>
+            <form method="post" action="/logout" class="inline-form">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button class="ghost-button" type="submit">Sign out</button>
+            </form>
+          </nav>
+        {% endif %}
+      </header>
+
+      {% if notice %}
+        <div class="flash flash-success">{{ notice }}</div>
+      {% endif %}
+      {% if error %}
+        <div class="flash flash-error">{{ error }}</div>
+      {% endif %}
+
+      <main class="main-shell">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </body>
+</html>

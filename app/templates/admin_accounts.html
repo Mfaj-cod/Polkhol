@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Accounts - {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="settings-shell admin-shell">
+  <header class="surface-hero settings-hero">
+    <div class="surface-hero-copy">
+      <p class="eyebrow">Owner dashboard</p>
+      <h1>Account directory</h1>
+      <p class="muted">This page exposes emails and account metadata, but never any message-to-user mapping.</p>
+    </div>
+    <div class="wa-stat-stack">
+      <div class="wa-stat-chip">
+        <span>Accounts</span>
+        <strong>{{ accounts|length }}</strong>
+      </div>
+      <div class="wa-stat-chip">
+        <span>Role</span>
+        <strong>Owner view</strong>
+      </div>
+    </div>
+  </header>
+
+  <section class="surface-card admin-panel admin-table-card">
+    <div class="card-header card-header-stack">
+      <div>
+        <p class="eyebrow">Admin records</p>
+        <h2>Accounts</h2>
+      </div>
+      <p class="muted">Use this for account lookup and support workflows only.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Username</th>
+            <th>Account code</th>
+            <th>Created</th>
+            <th>Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for account in accounts %}
+            <tr>
+              <td>{{ account.email }}</td>
+              <td>{{ account.username }}</td>
+              <td>{{ account.account_code }}</td>
+              <td>{{ account.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+              <td>{{ 'Owner' if account.is_admin else 'Member' }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
+{% endblock %}

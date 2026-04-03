@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="settings-shell">
+  <header class="surface-hero settings-hero">
+    <div class="surface-hero-copy">
+      <p class="eyebrow">Account settings</p>
+      <h1>Identity controls</h1>
+      <p class="muted">Your email is private from other users. Your username is flexible. Your group aliases stay unchanged after every rename or reset.</p>
+    </div>
+    <div class="wa-stat-stack">
+      <div class="wa-stat-chip">
+        <span>Account code</span>
+        <strong>{{ current_user.account_code }}</strong>
+      </div>
+      <div class="wa-stat-chip">
+        <span>Username</span>
+        <strong>{{ current_user.username }}</strong>
+      </div>
+    </div>
+  </header>
+
+  <div class="identity-grid">
+    <article class="identity-card surface-card">
+      <span class="label">Email</span>
+      <strong>{{ current_user.email }}</strong>
+      <p class="muted">Only you and the app owner can see this.</p>
+    </article>
+    <article class="identity-card surface-card">
+      <span class="label">Current username</span>
+      <strong>{{ current_user.username }}</strong>
+      <p class="muted">Shown when people search for you outside anonymous rooms.</p>
+    </article>
+    <article class="identity-card surface-card">
+      <span class="label">Account code</span>
+      <strong>{{ current_user.account_code }}</strong>
+      <p class="muted">Use this to disambiguate duplicate usernames.</p>
+    </article>
+  </div>
+
+  <div class="settings-columns">
+    <form class="surface-card inset-panel stack-form" method="post" action="/account/username">
+      <div>
+        <p class="eyebrow">Rename yourself</p>
+        <h2>Set a new username</h2>
+        <p class="muted">This updates how people find you before they add you to rooms.</p>
+      </div>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>
+        <span>Username</span>
+        <input type="text" name="username" required minlength="2" maxlength="48" value="{{ current_user.username }}">
+      </label>
+      <button class="primary-button" type="submit">Save username</button>
+    </form>
+
+    <form class="surface-card inset-panel stack-form" method="post" action="/account/username/reset">
+      <div>
+        <p class="eyebrow">Fresh disguise</p>
+        <h2>Random username reset</h2>
+        <p class="muted">Generate a brand-new username instantly. Existing group aliases will not change.</p>
+      </div>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="ghost-button" type="submit">Reset to random username</button>
+    </form>
+  </div>
+</section>
+{% endblock %}
