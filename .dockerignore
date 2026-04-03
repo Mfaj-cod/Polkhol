@@ -1,0 +1,6 @@
+/polenv/
+/.benchmarks/
+.pytest_tmp/
+
+conda-meta/
+*.conda
