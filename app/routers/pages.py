@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Request
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, Depends, Request # type: ignore
+from fastapi.responses import RedirectResponse # type: ignore
 from sqlalchemy.orm import Session
 
 from app.database import get_db
